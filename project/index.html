@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>INFO 5100 Project 1</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      .gridlines line {
+          stroke: #bbb;
+      }
+
+      .gridlines .domain {
+          stroke: none;
+      }
+  </style>
+  </head>
+  <body>
+    <p id="graph-1">
+      
+      <!-- G1 -->
+      <h3>Graph 1</h3>
+      <div id = "graphs">
+        <svg
+          id="slope-chart-1"
+          width="640"
+          height="640"
+        >
+
+        <image class="wallpaper" width="100%" height="350" style="opacity:0.3"
+                preserveAspectRatio="xMidYMid slice" xlink:href="https://i2.wp.com/wmqcomics.com/wp-content/uploads/2020/05/MarvelLogo.jpg?fit=1600%2C878"/>
+
+        </svg>
+        <br>
+
+        <!-- G2 -->
+        <h3>Graph 2</h3>
+        <svg id="scatterplot" height="800" width="1150"></svg>
+        </svg>
+        
+        <br>
+        <!-- G3 -->
+        <h3>Graph 3</h3>
+        <svg id="scatterplot_1" height="800" width="1200" style="margin-top:50px" overflow="scroll">
+          <text id="label" x="590" y="5"  text-anchor="end" alignment-baseline="hanging"></text>
+        </svg>
+      </div>
+
+
+      <script id="slope-chart-1">
+
+        d3.csv("output.csv").then((data) => {
+          let svg = d3.select("svg#slope-chart-1");
+
+
+          const margin = { top: 20, right: 20, bottom: 20, left: 50 };
+          const width = svg.attr("width");
+          const height = svg.attr("height");
+          const chartWidth = width - margin.left - margin.right;
+          const chartHeight = height - margin.top - margin.bottom;
+
+          //  set header
+          svg
+          .append("text")
+          .attr("x", chartWidth /2 + 40 )
+          .attr("y", margin.top + 15 )
+          .style("text-anchor", "middle")
+          .style("text-align", "center")
+          .attr("font-size", 20)
+          .text("Slope Graph: IMDB Score VS. Metascore")
+
+            // set reference bar
+          svg
+            .append("line")
+            .attr("x1", margin.left + 70)
+            .attr("y1", margin.bottom + 50)
+            .attr("x2", margin.left + 70)
+            .attr("y2", chartHeight - 50)
+            .style("stroke", "black")
+            .style("stroke-dasharray", ("3, 3"))
+            .style("stroke-width", 2);
+          svg
+            .append("line")
+            .attr("x1", chartWidth - 50)
+            .attr("y1", 70)
+            .attr("x2", chartWidth - 50)
+            .attr("y2", chartHeight - 50)
+            .style("stroke", "black")
+            .style("stroke-dasharray", ("3, 3"))
+            .style("stroke-width", 2);
+
+          // design scales
+          let imdbScale = d3.scaleLinear().domain([5, 9]).range([570, 70]);
+          let metaScale = d3.scaleLinear().domain([5, 9]).range([570, 70]);
+
+          // draw slope line
+          data.forEach((d, i) => {
+            let IMDB = d["IMDB rating"];
+            let meta = d["metascore"] / 10;
+            let name = d["Name"]
+            console.log(imdbScale(IMDB))
+            console.log(metaScale(meta))
+
+            let currentColor;
+            // if critics' score are better than IMDB score, use blue
+            if (meta >= IMDB){
+                currentColor = "blue"
+            // else, use red
+            } else {
+                currentColor = 	"black"
+            }
+            svg
+              .append("circle")
+              .attr("cx", 120)
+              .attr("cy", imdbScale(IMDB))
+              .attr("r", 2)
+              .style("fill", currentColor)
+
+            svg
+              .append("circle")
+              .attr("cx", chartWidth - 50)
+              .attr("cy", metaScale(meta))
+              .attr("r", 2)
+              .style("fill", currentColor)
+            
+            svg
+            .append("line")
+            .attr("x1", 120)
+            .attr("x2", chartWidth - 50)
+            .attr("y1", imdbScale(IMDB))
+            .attr("y2", metaScale(meta))
+            .style("stroke", currentColor)
+            .style("stroke-width", 2);
+
+            // annotations
+
+            // IMDB
+
+            svg
+              .append("text")
+              .attr("x", margin.left + 65)
+              .attr("y", imdbScale(IMDB))
+              .style("text-anchor", "end")
+              .style("text-align", "end")
+              .text(name)
+              .attr("font-size", 7)
+
+            // Meta
+            svg
+              .append("text")
+              .attr("x", chartWidth - 45)
+              .attr("y", metaScale(meta))
+              .style("text-anchor", "start")
+              .style("text-align", "end")
+              .text(name)
+              .attr("font-size", 7)
+
+          });
+
+          // set footer
+          svg
+            .append("text")
+            .attr("x", 120 )
+            .attr("y", 60 )
+            .style("text-anchor", "middle")
+            .style("text-align", "center")
+            .attr("font-size", 10)
+            .text("IMDB Score")
+
+          svg
+            .append("text")
+            .attr("x", chartWidth - 50)
+            .attr("y", 60 )
+            .style("text-anchor", "middle")
+            .style("text-align", "center")
+            .attr("font-size", 10)
+            .text("Metascore")
+
+          //   annotations
+          svg.attr("font-family", "Saira").style("fill", "black").attr("font-size", 10);
+        });
+
+      </script>
+    </p>
+
+    <p id="graph-2">
+      <script>
+      const svg = d3.select("svg#scatterplot");
+    
+      const width = svg.attr("width");
+      const height = svg.attr("height");
+      const margin = { top: 80, right: 80, bottom: 80, left: 120 };
+      const chartWidth = width - margin.left - margin.right;
+      const chartHeight = height - margin.top - margin.bottom;
+    
+      let annotations = svg.append("g").attr("id", "annotations");
+      let chartArea = svg
+        .append("g")
+        .attr("id", "points")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
+
+      chartArea
+          .append("text")
+          .attr("x", chartWidth / 2 )
+          .attr("y", -50 )
+          .style("text-anchor", "middle")
+          .style("text-align", "center")
+          .attr("font-size", 20)
+          .text("Dot Plot: Characters vs. Character Gross")
+    
+      d3.csv("character.csv").then((data) => {
+        const grossExtent = d3.extent(data, (d) => d["character_gross"]);
+        const grossScale = d3
+          .scaleLinear()
+          .domain(grossExtent)
+          .range([chartHeight, 0]);
+    
+        let leftAxis = d3.axisLeft(grossScale);
+        let leftGridlines = d3
+          .axisLeft(grossScale)
+          .tickSize(-chartWidth - 10)
+          .tickFormat("");
+        annotations
+          .append("g")
+          .attr("class", "y axis")
+          .attr("transform", `translate(${margin.left - 10},${margin.top})`)
+          .call(leftAxis);
+    
+        annotations
+          .append("g")
+          .attr("class", "y gridlines")
+          .attr("transform", `translate(${margin.left - 10},${margin.top})`)
+          .style("stroke-dasharray", "5 5")
+          .call(leftGridlines);
+    
+        const characterValue = d3.map(data, (d) => d.character);
+    
+        // Probelm
+        const characterScale = d3
+          .scaleBand()
+          .domain(characterValue)
+          .range([0, chartWidth]);
+    
+        let bottomAxis = d3.axisBottom(characterScale);
+    
+        annotations
+          .append("g")
+          .attr("class", "x axis")
+          .attr(
+            "transform",
+            `translate(${margin.left},${chartHeight + margin.top + 10})`
+          )
+          .call(bottomAxis);
+    
+        // Add X-axis Label
+        svg
+          .append("text")
+          .attr("text-anchor", "end")
+          .attr("x", chartWidth + 120)
+          .attr("y", chartHeight + margin.top + 50)
+          .text("Character Name");
+    
+        // Add Y-axis Label
+        svg
+          .append("text")
+          .attr("text-anchor", "end")
+          // .attr("transform", "rotate(-90)")
+          .attr("x", margin.left + 50)
+          .attr("y", margin.top - 20)
+          .text("Character Gross");
+    
+        var config = {
+          avatar_size: 30,
+        };
+    
+        var defs = svg.append("svg:defs");
+    
+        svg
+          .append("clipPath")
+          .attr("id", "clipObj")
+          .append("circle")
+          .attr("cx", config.avatar_size / 2)
+          .attr("cy", config.avatar_size / 2)
+          .attr("r", config.avatar_size / 2);
+    
+        let xAdjustment = 127;
+        let yAdjustment = 50;
+    
+        data.forEach(function (d, i) {
+          svg
+            .append("image")
+            .attr("xlink:href", d["character_icon"])
+            .attr("width", config.avatar_size)
+            .attr("height", config.avatar_size)
+            .attr(
+              "transform",
+              "translate(" +
+                parseInt(
+                  characterScale(d.character) + xAdjustment + config.avatar_size / 2
+                ) +
+                "," +
+                parseInt(
+                  grossScale(d.character_gross) +
+                    yAdjustment +
+                    config.avatar_size / 2
+                ) +
+                ")"
+            )
+            .attr("clip-path", "url(#clipObj)");
+        });
+    
+        //lollippos
+    
+        let bottomGridlines = d3
+          .axisBottom(characterScale)
+          .tickSize(-chartHeight - 10)
+          .tickFormat("");
+        annotations
+          .append("g")
+          .attr("class", "x gridlines")
+          .attr(
+            "transform",
+            `translate(${margin.left},${chartHeight + margin.top + 10})`
+          )
+          .style("stroke-dasharray", "5 5")
+          .call(bottomGridlines);
+      });
+      </script>
+    </p>
+
+    <p id="graph-3">
+      <script id = "scatterplot_1">
+        const plot = d3.select("svg#scatterplot_1");
+  
+        const width0 = plot.attr("width");
+        const height0 = plot.attr("height");
+        const margin0 = {top: 150, right: 100, bottom: 150, left: 100};
+  
+        const chartWidth0 = width0 - margin0.left - margin0.right;
+        const chartHeight0 = height0 - margin0.top - margin0.bottom;
+
+        let annotations0 = plot.append("g").attr("id","annotations");
+        let chartArea0 = plot.append("g").attr("id","points")
+                  .attr("transform",`translate(${margin0.left},${margin0.top})`);
+
+
+        chartArea0
+          .append("text")
+          .attr("x", chartWidth0 / 2 )
+          .attr("y", -50 )
+          .style("text-anchor", "middle")
+          .style("text-align", "center")
+          .attr("font-size", 20)
+          .text("Dot Plot: Budget vs. Total Gross vs IMDB Rating")
+
+         // Add X-axis Label
+         plot
+            .append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width0/2 +30 )
+            .attr("y", height0  -70 )
+            .text("Budget");
+
+        // Add Y-axis Label
+        plot
+            .append("text")
+            .attr("text-anchor", "end")
+            .attr("x", 140)
+            .attr("y", 120)
+            .text("Total_Gross");
+
+            plot
+            .append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width0 -80 )
+            .attr("y", height0  -70 )
+            .text("----each circle radius refers to IMDB score");
+
+        d3.csv("output.csv").then( (data) => {
+
+            // x axis
+            const BudgetExtent = d3.extent(data, d => Number(d['Budget']) );
+            const BudgetScale = d3.scaleLinear().domain(BudgetExtent).range([0, chartWidth0]);
+            
+            // y axis
+            const Total_GrossExtent = d3.extent(data, d => Number(d['Total Gross']) );
+            const Total_GrossScale = d3.scaleLinear().domain(Total_GrossExtent).range([chartHeight0, 0]);
+
+            // circle 
+            const IMDBExtent = d3.extent(data, d => Number(d['IMDB rating']) );
+            const IMDBScale = d3.scaleLinear().domain(IMDBExtent).range([10, 50]);
+
+            console.log(BudgetExtent);
+            console.log(Total_GrossExtent);
+            console.log(IMDBExtent);
+
+            // bottom axis
+            let bottomAxis = d3.axisBottom(BudgetScale)
+                               .tickFormat(d3.format(".2s"))
+                            //    .tickSize(20);  
+            let bottomGridlines = d3.axisBottom(BudgetScale)
+                                    .tickSize(-chartHeight0-10)
+                                    .tickFormat("")
+                                    // .tickSize(9);
+
+            annotations0.append("g")
+                       .attr("class", "x axis")
+                       .attr("transform",`translate(${margin0.left},${chartHeight0+margin0.top+15})`)
+                       .call(bottomAxis);
+            annotations0.append("g")
+                       .attr("class", "x gridlines")
+                       .attr("transform",`translate(${margin0.left},${chartHeight0+margin0.top+10})`)
+                       .call(bottomGridlines);
+            
+            // left axis
+            let leftAxis = d3.axisLeft(Total_GrossScale)
+                             .tickFormat(d3.format(".3s"))
+                            //  .tickSize(20);  
+            let leftGridlines = d3.axisLeft(Total_GrossScale)
+                                  .tickSize(-chartWidth0)
+                                  .tickFormat("")
+                                //   .tickSize(20)
+            
+            annotations0.append("g")
+                       .attr("class", "y axis")
+                       .attr("transform",`translate(${margin0.left-10},${margin0.top})`)
+                       .call(leftAxis)
+            annotations0.append("g")
+                       .attr("class", "y gridlines")
+                       .attr("transform",`translate(${margin0.left},${margin0.top})`)
+                       .call(leftGridlines);
+            
+            const genreScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+            data.forEach( (d, i) => {
+                let circle = chartArea0.append("circle")
+                                      .attr("cx", BudgetScale(Number(d['Budget'])))
+                                      .attr("cy", Total_GrossScale(Number(d['Total Gross'])))
+                                      .attr("r", IMDBScale(Number(d['IMDB rating'])))
+                                      .attr("opacity", 0.4)
+                                      .attr("fill", genreScale(d['Name']) )  // refer to scaleOrdinal in scales section
+                                      .attr("label", d["Name"])
+                                    
+            })
+
+            // let lineGenerator = d3.line()
+            //                       .x(function(d) { return BudgetScale(Number(d['Budget'])) ;} )
+            //                       .y(function(d) { return Total_GrossScale(Number(d['Total Gross'])) ;} )
+            //                     //   .curve(d3.curveBasisOpen)
+
+            // chartArea.append('path')
+            //         .attr('stroke', '#333')
+            //         .attr('stroke-width', '2')
+            //         .attr('fill', 'none')
+            //         .attr('d', lineGenerator(data));
+
+            var xSum = 0;
+            var ySum =0;
+            data.forEach( (d, i) => {
+                xSum += Number(d['Budget']);
+                ySum += Number(d['Total Gross']);
+            });
+
+            console.log("xSum:",xSum);
+            var xMean = xSum/data.length;
+            console.log("xMean:",xMean);
+
+            console.log("ySum:",ySum);
+            var yMean = ySum/data.length;
+            console.log("yMean:",yMean);
+            
+            var num=0;
+            var den=0;
+            data.forEach( (d, i) => {
+                var x = Number(d['Budget']);
+                var y = Number(d['Total Gross']);
+                num += (x-xMean)*(y-yMean);
+                den += (x-xMean)*(x-xMean);
+            });
+            let a = num/den;
+            let b = yMean - a*xMean;
+
+            chartArea0.append("line")
+                     .attr("x1", BudgetScale(BudgetExtent[0]) )
+                     .attr("x2", BudgetScale(BudgetExtent[1]) )
+                     .attr("y1", Total_GrossScale(a*BudgetExtent[0]+b) )
+                     .attr("y2", Total_GrossScale(a*BudgetExtent[1]+b) )
+                     .style("stroke", "#F05555")
+                     .style("stroke-width", 1);
+        })
+    </script>
+      
+    </p>
+
+  </body>
+</html>
